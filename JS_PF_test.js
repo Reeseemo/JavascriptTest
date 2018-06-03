@@ -6,6 +6,8 @@ if (!Array.isArray) {
 }
 
 //===============GLOBALS======================================
+var aWinkelmandje = [{}, {}];
+
 var aGroenten = [["aardappelen", 0.95, "kg"],
     ["avocado", 2.69, "stuk"],
     ["bloemkool", 1.93, "stuk"],
@@ -30,7 +32,7 @@ var aGroenten = [["aardappelen", 0.95, "kg"],
     ["ui", 0.89, "kg"],
     ["witloof 1ste keus", 1.49, "700g"],
     ["wortelen", 2.59, "kg"],
-    ["courgetten", 1.5, "stuk"]]
+    ["courgetten", 1.5, "stuk"]];
 
 var aoWinkels = [{
     naam: "de fruitmand",
@@ -56,7 +58,7 @@ var aoWinkels = [{
         gemeente: "Antwerpen",
         tel: "0230342218",
         manager: "Bert Simoens"
-    }]
+    }];
 
 window.onload = function () {
 
@@ -66,7 +68,10 @@ window.onload = function () {
     //keuzelijsten
     var eGroente = document.getElementById('groente');
     var eWinkel = document.getElementById('winkel');
+    var eAantal = document.getElementById('aantal');
+    //andere
     var eWinkelmandje = document.getElementById('winkelmandje');
+    var eOutput = document.getElementById('output');
 
 //=======GROENTE KEUZELIJST OPVULLEN =========================================
     var eDF = document.createDocumentFragment();
@@ -100,4 +105,87 @@ window.onload = function () {
     eWinkel.appendChild(eDFr);
 
 
+    //=======EVENT HANDLERS=========================================
+
+    eToevoegen.addEventListener('click', function () {
+        //formulierwaarden aflezen
+
+        var sWinkel = eWinkel.value;
+        var sGroente = eGroente.value;
+        var nAantal = eAantal.value;
+
+        //validatie
+        if (nAantal == "" || isNaN(nAantal) || nAantal < 1 || sGroente == "" || sWinkel == "") {
+            //nok
+            //console.log('validatie NOK');
+            alert('Een verplicht veld is niet correct ingevuld')
+        }
+        else {
+            //ok
+            //console.log('validatie OK');
+            fnGroenteToevoegen(sWinkel, sGroente, nAantal);
+            //formulier reset voor volgende toevoeging
+            document.frmBestel.reset()
+            eOutput.innerHTML = fnToonWinkelmandje(aWinkelmandje);
+        }
+    });//einde eToevoegen click event
+
+
+}; //einde window.onload
+
+
+//=======FUNCTIES==================================================
+
+function fnGroenteToevoegen(winkel, groente, aantal) {
+
+    //console.log(arguments)
+    var lineItem = new Object();
+    lineItem.winkel = winkel;
+    lineItem.groente = groente;
+    lineItem.aantal = aantal;
+    lineItem.id = parseInt((Math.random() * 10000) + 1); //willekeurig
+
+
+    aWinkelmandje.push(lineItem);
+
+    //console.log(aWinkelmandje)
+}
+
+//=====================================================
+
+function fnToonWinkelmandje(aoData) {
+
+    var sLijst = "";
+    if (aoData.length > 0) {
+        //overloopt het array
+        for (var i = 0; i < aoData.length; i++) {
+            //overloopt alle eigenschappen van een lineItem en bouwt sLijst
+            var oLineItem = aoData[i];
+            //console.log(oLineItem)
+            sLijst += "<div class='lineItem'" +
+                " id='itemId_" + oLineItem.id + "'" +
+                "'>";
+
+            for (var key in oLineItem) {
+                var propWaarde = oLineItem[key];
+                //uitzondering voor id en vrienden
+                if (key != "id" && key != "vrienden") {
+                    if (Array.isArray(propWaarde)) {
+                        //console.log(key + '= object');
+                        sLijst += "<span class='prop'>" + key + "</span><span class='val'>" + fnToonWinkelmandje(propWaarde) + "</span>";
+                    }
+                    else {
+                        sLijst += "<span class='prop'>" + key + ":</span><span class='val'>" + propWaarde + "</span>";
+                    }
+                }
+
+            }
+
+            sLijst += "</div>\n";
+            //console.log(sLijst);
+        }
+
+    }
+
+    return sLijst;
 }
